@@ -1,0 +1,3 @@
+<launch>
+    <node name="debug" pkg="robot_env_evaluator" type="robot_env_evaluator" required="true"/>
+</launch>
