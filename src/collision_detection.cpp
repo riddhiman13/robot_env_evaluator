@@ -83,6 +83,8 @@ int main(int /*argc*/, char ** /*argv*/)
     std::cout << "distance between pair " << cp.first << " and " << cp.second << ": "
               << dr.min_distance << std::endl;
     std::cout << " ";
+    std::cout << "nearest points:" << dr.nearest_points[0].transpose() << " and "
+              << dr.nearest_points[1].transpose() << std::endl;
   }
 
   // Perform the forward kinematics over the kinematic tree
