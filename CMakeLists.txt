@@ -30,6 +30,7 @@ message(STATUS
 
 ## System dependencies are found with CMake's conventions
 find_package(pinocchio REQUIRED)
+target_compile_options(pinocchio::pinocchio INTERFACE -Wno-cpp)
 
 ## Specify headers to define local paths
 set(ROENVEVAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -39,8 +40,8 @@ configure_file(
 )
 
 ## Declare a C++ library
-add_library(robot_env_evaluator
-  src/robot_env_evaluator.cpp
+add_library(robot_env_evaluator SHARED
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/robot_env_evaluator.cpp
 )
 target_include_directories(robot_env_evaluator 
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -49,3 +50,23 @@ target_include_directories(robot_env_evaluator
 target_link_libraries(robot_env_evaluator
   pinocchio::pinocchio
 )
+if(ROENVEVAL_DEBUG_MODE)
+    target_compile_definitions(robot_env_evaluator PRIVATE ROENVEVAL_DEBUG)
+    target_compile_options(robot_env_evaluator PRIVATE -g)
+endif()
+
+## Declare the example
+if(ROENVEVAL_BUILD_EXAMPLE)
+  list(APPEND ROENVEVAL_EXAMPLE
+    ${CMAKE_CURRENT_SOURCE_DIR}/example/robot_env_evaluator_example.cpp
+  )
+
+  foreach(EXAMPLE_FILE ${ROENVEVAL_EXAMPLE})
+    get_filename_component(EXAMPLE_NAME ${EXAMPLE_FILE} NAME_WE)
+    add_executable(${EXAMPLE_NAME} ${EXAMPLE_FILE})
+    target_link_libraries(${EXAMPLE_NAME} robot_env_evaluator)
+    if(ROENVEVAL_DEBUG_MODE)
+      target_compile_options(${EXAMPLE_NAME} PRIVATE -g)
+    endif()
+  endforeach()
+endif()
