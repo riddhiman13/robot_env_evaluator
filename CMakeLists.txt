@@ -31,17 +31,20 @@ message(STATUS
 ## System dependencies are found with CMake's conventions
 find_package(pinocchio REQUIRED)
 
-# add the debug flag
-if(ROENVEVAL_DEBUG_MODE)
-    add_compile_definitions(-g)
-endif()
+## Specify headers to define local paths
+set(ROENVEVAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/robot_env_evaluator/robot_env_evaluator_path.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/include/robot_env_evaluator/robot_env_evaluator_path.h
+)
 
 ## Declare a C++ library
 add_library(robot_env_evaluator
   src/robot_env_evaluator.cpp
 )
-target_include_directories(robot_env_evaluator PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+target_include_directories(robot_env_evaluator 
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 target_link_libraries(robot_env_evaluator
   pinocchio::pinocchio

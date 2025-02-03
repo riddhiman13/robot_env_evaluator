@@ -1,0 +1,2 @@
+#pragma once
+#define ROBOT_ENV_EVALUATOR_PATH "@ROENVEVAL_SOURCE_DIR@"
