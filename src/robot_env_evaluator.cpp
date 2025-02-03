@@ -3,12 +3,15 @@
 
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/multibody/geometry.hpp>
+#include <pinocchio/collision/collision.hpp>
+
+#include <iostream>
 
 namespace robot_env_evaluator
 {
     RobotEnvEvaluator::RobotEnvEvaluator(const pinocchio::Model& model,
-                                         const pinocchio::GeometryModel collision_model,
-                                         const pinocchio::GeometryModel visual_model)
+                                         const pinocchio::GeometryModel& collision_model,
+                                         const pinocchio::GeometryModel& visual_model)
         : model_(model), data_(model), collision_model_(collision_model), visual_model_(visual_model)
     {
         // Constructor implementation
@@ -113,7 +116,7 @@ namespace robot_env_evaluator
 
     void RobotEnvEvaluator::computeModelData(const Eigen::VectorXd& q)
     {
-        if (q != buffered_q_)
+        if (buffered_q_.size() == 0 || q != buffered_q_)
         {
             // Compute the model data
             pinocchio::forwardKinematics(model_, data_, q); 

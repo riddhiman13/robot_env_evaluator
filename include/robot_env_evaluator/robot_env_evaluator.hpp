@@ -4,11 +4,7 @@
 #include <vector>
 #include <variant>
 
-#include <pinocchio/parsers/urdf.hpp>
-#include <pinocchio/parsers/srdf.hpp>
-
 #include <pinocchio/algorithm/geometry.hpp>
-#include <pinocchio/collision/collision.hpp>
 
 // These headers are already included in previous headers, we write here to make VScode IntelliSense happy
 #include <Eigen/Dense>
@@ -41,7 +37,7 @@ namespace robot_env_evaluator
         Eigen::Vector3d normal_vector;
         Eigen::Vector3d nearest_point_on_robot;
         Eigen::Vector3d nearest_point_on_object;
-        Eigen::Vector3d projector_jointspace_to_dist;
+        Eigen::VectorXd projector_jointspace_to_dist;
     };
 
     class RobotEnvEvaluator{
@@ -58,8 +54,8 @@ namespace robot_env_evaluator
          * input them.
          */
         RobotEnvEvaluator(const pinocchio::Model& model,
-                          const pinocchio::GeometryModel collision_model,
-                          const pinocchio::GeometryModel visual_model = pinocchio::GeometryModel());
+                          const pinocchio::GeometryModel& collision_model,
+                          const pinocchio::GeometryModel& visual_model = pinocchio::GeometryModel());
         
         /**
          * @brief Destroy the Robot Env Evaluator object
