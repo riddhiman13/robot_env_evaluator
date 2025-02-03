@@ -83,7 +83,9 @@ namespace robot_env_evaluator
             // for collision pairs, we always put the robot higher index body as the second one. 
             // This will help with the distance computation.
             for(int i = 0; i < robot_geom_num; i++){
-                geom_model.addCollisionPair(pinocchio::CollisionPair(robot_geom_num + i_obstacle, i));
+                if(geom_model.geometryObjects[i].disableCollision == false){
+                    geom_model.addCollisionPair(pinocchio::CollisionPair(robot_geom_num + i_obstacle, i));
+                }
             }
 
             i_obstacle++;
@@ -97,21 +99,45 @@ namespace robot_env_evaluator
         pinocchio::computeDistances(geom_model, geom_data);
 
         // 5. output the distances into the output structure
-        for (int i = 0; i < geom_data.distanceResults.size(); i++)
+        // The first two links are ignored because they are base and first link of the robot
+        // They cannot move and are not able to avoid obstacles.
+        for (int i = 2; i < geom_data.distanceResults.size(); i++)
         {
             const auto& distance = geom_data.distanceResults[i];
             Eigen::Vector3d seperation_vector = (distance.nearest_points[1] - distance.nearest_points[0]).normalized();
-            Eigen::MatrixXd jacobian;
-            this->jacobian(q, geom_model.geometryObjects[geom_model.collisionPairs[i].second].parentJoint, jacobian);
+            Eigen::MatrixXd jacobian_matrix;
+            this->jacobian(q, geom_model.geometryObjects[geom_model.collisionPairs[i].second].parentJoint, jacobian_matrix);
             distances.push_back(distanceResult{
                 i,
                 distance.min_distance,
                 seperation_vector,
                 distance.nearest_points[1],
                 distance.nearest_points[0],
-                seperation_vector.transpose() * jacobian.topRows(3)
+                seperation_vector.transpose() * jacobian_matrix.topRows(3)
             });
         }
+
+        // 6. store the geom_model and geom_data for inspection in debug mode
+        #ifdef ROENVEVAL_DEBUG
+            geom_model_ = geom_model;
+            geom_data_ = geom_data;
+        #endif // ROENVEVAL_DEBUG
+    }
+
+    void RobotEnvEvaluator::InspectGeomModelAndData(void)
+    {
+        #ifdef ROENVEVAL_DEBUG
+            std::cout<< "Inspection on Geometry Objects: " << std::endl;
+            for(int i = 0; i < geom_model_.geometryObjects.size(); i++){
+                std::cout << i << ": " << geom_model_.geometryObjects[i].name << "  \tactive:"<< !geom_model_.geometryObjects[i].disableCollision << std::endl;
+            }
+            std::cout<< "Inspection on Collision Pairs: " << std::endl;
+            for(int i = 0; i < geom_model_.collisionPairs.size(); i++){
+                std::cout << i << ": ";
+                std::cout << geom_model_.collisionPairs[i].first << " [" << geom_model_.geometryObjects[geom_model_.collisionPairs[i].first].name << "] and ";
+                std::cout << geom_model_.collisionPairs[i].second << " [" << geom_model_.geometryObjects[geom_model_.collisionPairs[i].second].name << "]" << std::endl;
+            }
+        #endif // ROENVEVAL_DEBUG
     }
 
     void RobotEnvEvaluator::computeModelData(const Eigen::VectorXd& q)

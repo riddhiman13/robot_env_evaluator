@@ -96,6 +96,13 @@ namespace robot_env_evaluator
                               const std::vector<obstacleInput>& obstacles, 
                                     std::vector<distanceResult>& distances);
 
+        /**
+         * @brief Inspect the geom_model_ and geom_data_ stored in the last computeDistances().
+         * 
+         * Use a series of cout command to inspect the state.
+         */
+        void InspectGeomModelAndData(void);
+
         // configurations
         bool calculate_self_collision_ = false;      ///< Whether to calculate self-collision in distance computation
     
