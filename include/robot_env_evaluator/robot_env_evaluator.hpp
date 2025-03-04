@@ -1,10 +1,10 @@
 #ifndef ROBOT_ENV_EVALUATOR_HPP_
 #define ROBOT_ENV_EVALUATOR_HPP_
 
+#include <pinocchio/algorithm/geometry.hpp>
+
 #include <vector>
 #include <variant>
-
-#include <pinocchio/algorithm/geometry.hpp>
 
 // These headers are already included in previous headers, we write here to make VScode IntelliSense happy
 #include <Eigen/Dense>
@@ -67,8 +67,11 @@ namespace robot_env_evaluator
          * @brief The forward kinematics function for a specific joint
          * 
          * @param q The joint configuration
-         * @param joint_index The joint index, starting from 0 and end with degree of freedom - 1
+         * @param joint_index The joint index, starting from 0 and end with degree of freedom 
          * @param T The transformation matrix of the joint
+         * 
+         * As pinocchio convention, the index 0 is the base joint, and the index 1 is the first joint,
+         * therefore 1 to degree of freedom is the real joint index.
          */
         void forwardKinematics(const Eigen::VectorXd& q, 
                                const double joint_index, 
@@ -78,8 +81,11 @@ namespace robot_env_evaluator
          * @brief The jacobian function for a specific joint
          * 
          * @param q The joint configuration
-         * @param joint_index The joint index, starting from 0 and end with degree of freedom - 1
+         * @param joint_index The joint index, starting from 0 and end with degree of freedom 
          * @param J The jacobian matrix of the joint
+         * 
+         * As pinocchio convention, the index 0 is the base joint, and the index 1 is the first joint,
+         * therefore 1 to degree of freedom is the real joint index.
          */
         void jacobian(const Eigen::VectorXd& q,
                       const double joint_index,
