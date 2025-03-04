@@ -47,7 +47,7 @@ target_include_directories(robot_env_evaluator
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
   PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include
 )
-target_link_libraries(robot_env_evaluator
+target_link_libraries(robot_env_evaluator PUBLIC
   pinocchio::pinocchio
 )
 if(ROENVEVAL_DEBUG_MODE)
@@ -64,7 +64,7 @@ if(ROENVEVAL_BUILD_EXAMPLE)
   foreach(EXAMPLE_FILE ${ROENVEVAL_EXAMPLE})
     get_filename_component(EXAMPLE_NAME ${EXAMPLE_FILE} NAME_WE)
     add_executable(${EXAMPLE_NAME} ${EXAMPLE_FILE})
-    target_link_libraries(${EXAMPLE_NAME} robot_env_evaluator)
+    target_link_libraries(${EXAMPLE_NAME} PUBLIC robot_env_evaluator)
     if(ROENVEVAL_DEBUG_MODE)
       target_compile_options(${EXAMPLE_NAME} PRIVATE -g)
     endif()

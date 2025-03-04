@@ -82,4 +82,17 @@ int main(int argc, char **argv)
         std::cout << "Projector: " << distance.projector_jointspace_to_dist.transpose() << std::endl << std::endl;
     }    
     evaluator.InspectGeomModelAndData();
+
+    q = Eigen::VectorXd::Zero(7);
+    q(0) = 2.5796;
+    q(1) = -1.0262;
+    q(2) = 1.2127;
+    q(3) = -2.3626;
+    q(4) = -2.2054;
+    q(5) = 2.2720;
+    q(6) = -0.2889;
+
+    Eigen::MatrixXd J;
+    evaluator.jacobian(q, 7, J);
+    std::cout << "Jacobian: " << std::endl << J << std::endl;
 }

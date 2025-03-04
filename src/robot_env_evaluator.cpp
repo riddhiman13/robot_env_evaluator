@@ -30,7 +30,7 @@ namespace robot_env_evaluator
                                            Eigen::MatrixXd& J)
     {
         computeModelData(q);
-        J = pinocchio::getJointJacobian(model_, data_, joint_index, pinocchio::WORLD);
+        J = pinocchio::getJointJacobian(model_, data_, joint_index, pinocchio::LOCAL_WORLD_ALIGNED);
     }
 
     void RobotEnvEvaluator::computeDistances(const Eigen::VectorXd& q,
@@ -99,9 +99,7 @@ namespace robot_env_evaluator
         pinocchio::computeDistances(geom_model, geom_data);
 
         // 5. output the distances into the output structure
-        // The first two links are ignored because they are base and first link of the robot
-        // They cannot move and are not able to avoid obstacles.
-        for (int i = 2; i < geom_data.distanceResults.size(); i++)
+        for (int i = 0; i < geom_data.distanceResults.size(); i++)
         {
             const auto& distance = geom_data.distanceResults[i];
             Eigen::Vector3d seperation_vector = (distance.nearest_points[1] - distance.nearest_points[0]).normalized();
@@ -114,7 +112,7 @@ namespace robot_env_evaluator
                 distance.nearest_points[1],
                 distance.nearest_points[0],
                 seperation_vector.transpose() * jacobian_matrix.topRows(3)
-            });
+            }); 
         }
 
         // 6. store the geom_model and geom_data for inspection in debug mode
