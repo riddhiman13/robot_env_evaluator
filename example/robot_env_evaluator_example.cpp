@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     pinocchio::Model model_original;
     pinocchio::Model model;
     pinocchio::urdf::buildModel(urdf_filename, model_original, false);
-    std::vector<pinocchio::JointIndex> joints_to_lock = {7, 8};
+    std::vector<pinocchio::JointIndex> joints_to_lock = {8, 9};
     Eigen::VectorXd lock_positions(9);
     lock_positions << 0, 0, 0, 0, 0, 0, 0, 0.03, 0.03;
     pinocchio::buildReducedModel(model_original, joints_to_lock, lock_positions, model);
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     }
 
     // send it inside the evaluator and run with two obstacles
-    robot_env_evaluator::RobotEnvEvaluator evaluator(model, collision_model);
+    robot_env_evaluator::RobotEnvEvaluator evaluator(model, "panda_hand_tcp", collision_model);
 
     Eigen::VectorXd q = Eigen::VectorXd::Zero(model.nq);
     std::vector<robot_env_evaluator::obstacleInput> obstacles;
@@ -84,15 +84,9 @@ int main(int argc, char **argv)
     evaluator.InspectGeomModelAndData();
 
     q = Eigen::VectorXd::Zero(7);
-    q(0) = 2.5796;
-    q(1) = -1.0262;
-    q(2) = 1.2127;
-    q(3) = -2.3626;
-    q(4) = -2.2054;
-    q(5) = 2.2720;
-    q(6) = -0.2889;
+    q << 2.5796, -1.0262, 1.2127, -2.3626, -2.2054, 2.2720, -0.2889;
 
-    Eigen::MatrixXd J;
-    evaluator.jacobian(q, 7, J);
+    Eigen::MatrixXd J(6, model.nq);
+    evaluator.jacobian(q, J);
     std::cout << "Jacobian: " << std::endl << J << std::endl;
 }

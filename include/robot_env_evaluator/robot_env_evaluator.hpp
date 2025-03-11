@@ -1,14 +1,13 @@
 #ifndef ROBOT_ENV_EVALUATOR_HPP_
 #define ROBOT_ENV_EVALUATOR_HPP_
 
-#include <pinocchio/algorithm/geometry.hpp>
+#include <pinocchio/multibody/model.hpp>
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/geometry.hpp>
 
 #include <vector>
+#include <string>
 #include <variant>
-
-// These headers are already included in previous headers, we write here to make VScode IntelliSense happy
-#include <Eigen/Dense>
-#include <coal/shape/geometric_shapes.h>
 
 namespace robot_env_evaluator
 {
@@ -54,6 +53,7 @@ namespace robot_env_evaluator
          * input them.
          */
         RobotEnvEvaluator(const pinocchio::Model& model,
+                          const std::string& ee_name,
                           const pinocchio::GeometryModel& collision_model,
                           const pinocchio::GeometryModel& visual_model = pinocchio::GeometryModel());
         
@@ -67,28 +67,24 @@ namespace robot_env_evaluator
          * @brief The forward kinematics function for a specific joint
          * 
          * @param q The joint configuration
-         * @param joint_index The joint index, starting from 0 and end with degree of freedom 
          * @param T The transformation matrix of the joint
          * 
          * As pinocchio convention, the index 0 is the base joint, and the index 1 is the first joint,
          * therefore 1 to degree of freedom is the real joint index.
          */
-        void forwardKinematics(const Eigen::VectorXd& q, 
-                               const double joint_index, 
+        void forwardKinematics(const Eigen::VectorXd& q,
                                      Eigen::Matrix4d& T);
 
         /**
          * @brief The jacobian function for a specific joint
          * 
          * @param q The joint configuration
-         * @param joint_index The joint index, starting from 0 and end with degree of freedom 
          * @param J The jacobian matrix of the joint
          * 
          * As pinocchio convention, the index 0 is the base joint, and the index 1 is the first joint,
          * therefore 1 to degree of freedom is the real joint index.
          */
         void jacobian(const Eigen::VectorXd& q,
-                      const double joint_index,
                             Eigen::MatrixXd& J);
 
         /**
@@ -105,7 +101,8 @@ namespace robot_env_evaluator
         /**
          * @brief Inspect the geom_model_ and geom_data_ stored in the last computeDistances().
          * 
-         * Use a series of cout command to inspect the state.
+         * Use a series of cout command to inspect the state. Only activated when ROENVEVAL_DEBUG_MODE = ON
+         * in CMake option.
          */
         void InspectGeomModelAndData(void);
 
@@ -113,6 +110,17 @@ namespace robot_env_evaluator
         bool calculate_self_collision_ = false;      ///< Whether to calculate self-collision in distance computation
     
     protected:
+        /**
+         * @brief Get the Jacobian of specific frame, which correspond to the joint index
+         * 
+         * @param q Get the
+         * @param joint_index 
+         * @param J 
+         */
+        void jacobianFrame(const Eigen::VectorXd& q,
+                           const double joint_index,
+                                 Eigen::MatrixXd& J);
+
         /**
          * @brief Compute the model data from the joint configuration
          * 
@@ -130,6 +138,7 @@ namespace robot_env_evaluator
         pinocchio::Data data_;                       ///< The robot data, initialized from the model
         pinocchio::GeometryModel collision_model_;   ///< The collision model
         pinocchio::GeometryModel visual_model_;      ///< The visual model
+        int ee_index_;                               ///< The internal index for end-effector.frame
 
         pinocchio::GeometryModel geom_model_;        ///< The geometry model for collision computation
         pinocchio::GeometryData geom_data_;          ///< The geometry data for collision computation

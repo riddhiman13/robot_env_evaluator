@@ -42,10 +42,11 @@ configure_file(
 ## Declare a C++ library
 add_library(robot_env_evaluator SHARED
   ${CMAKE_CURRENT_SOURCE_DIR}/src/robot_env_evaluator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/robot_presets.cpp
 )
-target_include_directories(robot_env_evaluator 
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/include
+target_include_directories(robot_env_evaluator PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 target_link_libraries(robot_env_evaluator PUBLIC
   pinocchio::pinocchio
