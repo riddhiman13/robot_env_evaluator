@@ -11,27 +11,40 @@
 namespace robot_env_evaluator
 {
     RobotEnvEvaluator::RobotEnvEvaluator(const pinocchio::Model& model,
+                                         const std::string& ee_name,
                                          const pinocchio::GeometryModel& collision_model,
                                          const pinocchio::GeometryModel& visual_model)
         : model_(model), data_(model), collision_model_(collision_model), visual_model_(visual_model)
     {
         // Constructor implementation
+        if (model_.existFrame(ee_name)){
+            ee_index_ = model_.getFrameId(ee_name);
+        }
+        else{
+            throw std::invalid_argument("The targeted end-effector frame [" + ee_name + "] does not exist in the model.");
+        }
     }
 
-    void RobotEnvEvaluator::forwardKinematics(const Eigen::VectorXd& q, 
-                                              const double joint_index, 
+    void RobotEnvEvaluator::forwardKinematics(const Eigen::VectorXd& q,
                                                     Eigen::Matrix4d& T)
     {
         computeModelData(q);
-        T = data_.oMi[joint_index].toHomogeneousMatrix();
+        T = data_.oMf[ee_index_].toHomogeneousMatrix();
     }
 
     void RobotEnvEvaluator::jacobian(const Eigen::VectorXd& q,
-                                     const double joint_index,
                                            Eigen::MatrixXd& J)
     {
         computeModelData(q);
-        J = pinocchio::getJointJacobian(model_, data_, joint_index, pinocchio::LOCAL_WORLD_ALIGNED);
+        J = pinocchio::getFrameJacobian(model_, data_, ee_index_, pinocchio::LOCAL_WORLD_ALIGNED);
+    }
+
+    void RobotEnvEvaluator::jacobianFrame(const Eigen::VectorXd& q,
+                                          const double frame_index,
+                                                Eigen::MatrixXd& J)
+    {
+        computeModelData(q);
+        J = pinocchio::getFrameJacobian(model_, data_, frame_index, pinocchio::LOCAL_WORLD_ALIGNED);
     }
 
     void RobotEnvEvaluator::computeDistances(const Eigen::VectorXd& q,
@@ -105,7 +118,7 @@ namespace robot_env_evaluator
             const auto& distance = geom_data.distanceResults[i];
             Eigen::Vector3d seperation_vector = (distance.nearest_points[1] - distance.nearest_points[0]).normalized();
             Eigen::MatrixXd jacobian_matrix;
-            this->jacobian(q, geom_model.geometryObjects[geom_model.collisionPairs[i].second].parentJoint, jacobian_matrix);
+            this->jacobianFrame(q, geom_model.geometryObjects[geom_model.collisionPairs[i].second].parentFrame, jacobian_matrix);
             distances.push_back(distanceResult{
                 i,
                 distance.min_distance,
@@ -146,6 +159,7 @@ namespace robot_env_evaluator
             // Compute the model data
             pinocchio::forwardKinematics(model_, data_, q); 
             pinocchio::computeJointJacobians(model_, data_, q);
+            pinocchio::updateFramePlacements(model_, data_);
 
             // Update the buffered joint configuration
             buffered_q_ = q;
