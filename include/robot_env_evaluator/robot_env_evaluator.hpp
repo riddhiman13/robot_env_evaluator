@@ -1,14 +1,13 @@
 #ifndef ROBOT_ENV_EVALUATOR_HPP_
 #define ROBOT_ENV_EVALUATOR_HPP_
 
-#include <pinocchio/algorithm/geometry.hpp>
+#include <pinocchio/multibody/model.hpp>
+#include <pinocchio/multibody/data.hpp>
+#include <pinocchio/multibody/geometry.hpp>
 
 #include <vector>
+#include <string>
 #include <variant>
-
-// These headers are already included in previous headers, we write here to make VScode IntelliSense happy
-#include <Eigen/Dense>
-#include <coal/shape/geometric_shapes.h>
 
 namespace robot_env_evaluator
 {

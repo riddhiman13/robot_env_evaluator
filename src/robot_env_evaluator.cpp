@@ -1,11 +1,12 @@
-// @suppress("Type mismatch")
 #include <robot_env_evaluator/robot_env_evaluator.hpp>
 
+#include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/multibody/geometry.hpp>
 #include <pinocchio/collision/collision.hpp>
 
+#ifdef ROENVEVAL_DEBUG
 #include <iostream>
+#endif // ROENVEVAL_DEBUG
 
 namespace robot_env_evaluator
 {
