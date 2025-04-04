@@ -12,11 +12,10 @@
 int main(int argc, char **argv)
 {
     // make up a urdf and its geometry model
-    const std::string robot_path = "/opt/openrobots/share/example-robot-data";
-    const std::string urdf_filename = robot_path + "/robots/panda_description/urdf/panda.urdf";
-    const std::string stl_filename = robot_path + "/robots/panda_description/meshes/";
-    std::string srdf_filename = ROBOT_ENV_EVALUATOR_PATH;
-    srdf_filename += "/scripts/panda-alternative.srdf";
+    const std::string robot_env_evaluator_path = ROBOT_ENV_EVALUATOR_PATH;
+    const std::string robot_path = robot_env_evaluator_path + "robots";
+    const std::string urdf_filename = robot_env_evaluator_path + "/robots/panda_description/urdf/panda.urdf";
+    const std::string srdf_filename = robot_env_evaluator_path + "/robots/panda_description/srdf/panda.srdf";
 
     pinocchio::Model model_original;
     pinocchio::Model model;
@@ -27,7 +26,7 @@ int main(int argc, char **argv)
     pinocchio::buildReducedModel(model_original, joints_to_lock, lock_positions, model);
     
     pinocchio::GeometryModel collision_model;
-    pinocchio::urdf::buildGeom(model, urdf_filename, pinocchio::COLLISION, collision_model, "/opt/openrobots/share");
+    pinocchio::urdf::buildGeom(model, urdf_filename, pinocchio::COLLISION, collision_model, robot_env_evaluator_path);
     collision_model.addAllCollisionPairs();
     pinocchio::srdf::removeCollisionPairs(model, collision_model, srdf_filename);
     collision_model.geometryObjects[9].disableCollision = true;
@@ -51,7 +50,15 @@ int main(int argc, char **argv)
     }
 
     // send it inside the evaluator and run with two obstacles
-    robot_env_evaluator::RobotEnvEvaluator evaluator(model, "panda_hand_tcp", collision_model);
+    std::vector<std::string> joint_names;
+    joint_names.push_back("panda_joint1");
+    joint_names.push_back("panda_joint2");
+    joint_names.push_back("panda_joint3");
+    joint_names.push_back("panda_joint4");
+    joint_names.push_back("panda_joint5");
+    joint_names.push_back("panda_joint6");
+    joint_names.push_back("panda_joint7");
+    robot_env_evaluator::RobotEnvEvaluator evaluator(model, "panda_hand_tcp", joint_names, collision_model);
 
     Eigen::VectorXd q = Eigen::VectorXd::Zero(model.nq);
     std::vector<robot_env_evaluator::obstacleInput> obstacles;
