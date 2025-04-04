@@ -17,13 +17,16 @@ namespace robot_env_evaluator{
         /**
          * @brief Get the Preset Robot object
          * 
-         * @param model The robot model
-         * @param collision_model The collision model
+         * @param model The robot model output
+         * @param ee_name The end-effector name output
+         * @param joint_names The joint names output
+         * @param collision_model The collision model output
          * 
          * This is a pure virtual function, which should be implemented with exact same signature in the derived class.
          */
         virtual void getPresetRobot(pinocchio::Model& model, 
                                     std::string& ee_name,
+                                    std::vector<std::string>& joint_names,
                                     pinocchio::GeometryModel& collision_model) = 0;
     };
 
@@ -38,6 +41,7 @@ namespace robot_env_evaluator{
 
         void getPresetRobot(pinocchio::Model& model, 
                             std::string& ee_name,
+                            std::vector<std::string>& joint_names,
                             pinocchio::GeometryModel& collision_model) override;
     };
 

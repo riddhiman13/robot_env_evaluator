@@ -12,6 +12,7 @@ namespace robot_env_evaluator
 {
     RobotEnvEvaluator::RobotEnvEvaluator(const pinocchio::Model& model,
                                          const std::string& ee_name,
+                                         const std::vector<std::string>& joint_names,
                                          const pinocchio::GeometryModel& collision_model,
                                          const pinocchio::GeometryModel& visual_model)
         : model_(model), data_(model), collision_model_(collision_model), visual_model_(visual_model)
@@ -23,20 +24,73 @@ namespace robot_env_evaluator
         else{
             throw std::invalid_argument("The targeted end-effector frame [" + ee_name + "] does not exist in the model.");
         }
+
+        // Check if the joint names are valid
+        joint_indices_.clear();
+        for (const auto& joint_name : joint_names)
+        {
+            if(model.existFrame(joint_name)){
+                joint_indices_.push_back(model.getFrameId(joint_name));
+            }
+            else{
+                throw std::invalid_argument("The joint name [" + joint_name + "] does not exist in the model.");
+            }
+        }
     }
 
     void RobotEnvEvaluator::forwardKinematics(const Eigen::VectorXd& q,
-                                                    Eigen::Matrix4d& T)
+                                              Eigen::Matrix4d& T,
+                                              const int joint_index /* = -1 */)
     {
         computeModelData(q);
-        T = data_.oMf[ee_index_].toHomogeneousMatrix();
+        if (joint_index == -1) {
+            T = data_.oMf[ee_index_].toHomogeneousMatrix();
+        } else {
+            if (joint_index < 0 || joint_index - 1>= joint_indices_.size()) {
+                throw std::out_of_range("joint_index" + std::to_string(joint_index) + " is out of range [0, " + std::to_string(joint_indices_.size()) + "]");
+            }
+            T = data_.oMf[joint_indices_[joint_index - 1]].toHomogeneousMatrix();
+        }
+    }
+
+    void RobotEnvEvaluator::forwardKinematicsByFrameName(const Eigen::VectorXd& q,
+                                                         Eigen::Matrix4d& T,
+                                                         const std::string& frame_name)
+    {
+        computeModelData(q);
+        if (model_.existFrame(frame_name)) {
+            int frame_index = model_.getFrameId(frame_name);
+            T = data_.oMf[frame_index].toHomogeneousMatrix();
+        } else {
+            throw std::invalid_argument("forwardKinematicsByFrameName: The frame name [" + frame_name + "] does not exist in the model.");
+        }
     }
 
     void RobotEnvEvaluator::jacobian(const Eigen::VectorXd& q,
-                                           Eigen::MatrixXd& J)
+                                     Eigen::MatrixXd& J,
+                                     const int joint_index /* = -1 */)
+    {
+        if (joint_index == -1) {
+            jacobianFrame(q, ee_index_, J);
+        } else {
+            if (joint_index < 0 || joint_index - 1>= joint_indices_.size()) {
+                throw std::out_of_range("joint_index" + std::to_string(joint_index) + " is out of range [0, " + std::to_string(joint_indices_.size()) + "]");
+            }
+            jacobianFrame(q, joint_indices_[joint_index - 1], J);
+        }
+    }
+
+    void RobotEnvEvaluator::jacobianByFrameName(const Eigen::VectorXd& q,
+                                                      Eigen::MatrixXd& J,
+                                                const std::string& frame_name)
     {
         computeModelData(q);
-        J = pinocchio::getFrameJacobian(model_, data_, ee_index_, pinocchio::LOCAL_WORLD_ALIGNED);
+        if (model_.existFrame(frame_name)) {
+            int frame_index = model_.getFrameId(frame_name);
+            jacobianFrame(q, frame_index, J);
+        } else {
+            throw std::invalid_argument("The frame name [" + frame_name + "] does not exist in the model.");
+        }
     }
 
     void RobotEnvEvaluator::jacobianFrame(const Eigen::VectorXd& q,

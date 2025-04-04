@@ -9,14 +9,14 @@ namespace robot_env_evaluator
 {
     void FrankaEmikaPreset::getPresetRobot(pinocchio::Model &model,
                                            std::string& ee_name,
+                                           std::vector<std::string>& joint_names,
                                            pinocchio::GeometryModel &collision_model)
     {
-        // Do nothing
-        const std::string robot_path = "/opt/openrobots/share/example-robot-data";
-        const std::string urdf_filename = robot_path + "/robots/panda_description/urdf/panda.urdf";
-        const std::string stl_filename = robot_path + "/robots/panda_description/meshes/";
-        std::string srdf_filename = ROBOT_ENV_EVALUATOR_PATH;
-        srdf_filename += "/scripts/panda-alternative.srdf";
+        // get the robot path
+        const std::string robot_env_evaluator_path = ROBOT_ENV_EVALUATOR_PATH;
+        const std::string robot_path = robot_env_evaluator_path + "robots";
+        const std::string urdf_filename = robot_env_evaluator_path + "/robots/panda_description/urdf/panda.urdf";
+        const std::string srdf_filename = robot_env_evaluator_path + "/robots/panda_description/srdf/panda.srdf";
         
         // model
         pinocchio::Model model_original;
@@ -28,9 +28,17 @@ namespace robot_env_evaluator
 
         // ee_name
         ee_name = "panda_hand_tcp";
+        joint_names.clear();
+        joint_names.push_back("panda_joint1");
+        joint_names.push_back("panda_joint2");
+        joint_names.push_back("panda_joint3");
+        joint_names.push_back("panda_joint4");
+        joint_names.push_back("panda_joint5");
+        joint_names.push_back("panda_joint6");
+        joint_names.push_back("panda_joint7");
         
         // collision_model
-        pinocchio::urdf::buildGeom(model, urdf_filename, pinocchio::COLLISION, collision_model, "/opt/openrobots/share");
+        pinocchio::urdf::buildGeom(model, urdf_filename, pinocchio::COLLISION, collision_model, robot_env_evaluator_path);
         collision_model.addAllCollisionPairs();
         pinocchio::srdf::removeCollisionPairs(model, collision_model, srdf_filename);
         collision_model.geometryObjects[0].disableCollision = true;
@@ -48,7 +56,7 @@ namespace robot_env_evaluator
 
     std::unique_ptr<RobotPresetInterface> RobotPresetFactory::createRobotPreset(const std::string &robot_name)
     {
-        if(robot_name == "FrankaEmika")
+        if(robot_name == "panda")
         {
             return std::make_unique<FrankaEmikaPreset>();
         }
