@@ -45,9 +45,11 @@ namespace robot_env_evaluator
         computeModelData(q);
         if (joint_index == -1) {
             T = data_.oMf[ee_index_].toHomogeneousMatrix();
+        } else if (joint_index == 0) {
+            T = data_.oMf[0].toHomogeneousMatrix();
         } else {
-            if (joint_index < 0 || joint_index - 1>= joint_indices_.size()) {
-                throw std::out_of_range("joint_index" + std::to_string(joint_index) + " is out of range [0, " + std::to_string(joint_indices_.size()) + "]");
+            if (joint_index < 0 || joint_index > joint_indices_.size()) {
+                throw std::out_of_range("joint_index [" + std::to_string(joint_index) + "] is out of range [0, " + std::to_string(joint_indices_.size()) + "]");
             }
             T = data_.oMf[joint_indices_[joint_index - 1]].toHomogeneousMatrix();
         }
@@ -72,8 +74,10 @@ namespace robot_env_evaluator
     {
         if (joint_index == -1) {
             jacobianFrame(q, ee_index_, J);
+        } else if (joint_index == 0) {
+            jacobianFrame(q, 0, J);
         } else {
-            if (joint_index < 0 || joint_index - 1>= joint_indices_.size()) {
+            if (joint_index < 0 || joint_index > joint_indices_.size()) {
                 throw std::out_of_range("joint_index" + std::to_string(joint_index) + " is out of range [0, " + std::to_string(joint_indices_.size()) + "]");
             }
             jacobianFrame(q, joint_indices_[joint_index - 1], J);

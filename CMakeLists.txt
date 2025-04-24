@@ -20,6 +20,7 @@ endif()
 
 option(ROENVEVAL_BUILD_EXAMPLE "Build the example" ${ROENVEVAL_BUILD_EXAMPLE_DEFAULT})
 option(ROENVEVAL_DEBUG_MODE "Build with debug mode" ${ROENVEVAL_DEBUG_MODE_DEFAULT})
+option(ROENVEVAL_BUILD_TESTS "Build the unit tests" ${ROENVEVAL_BUILD_EXAMPLE_DEFAULT})
 
 # display the options
 message(STATUS 
@@ -70,4 +71,20 @@ if(ROENVEVAL_BUILD_EXAMPLE)
       target_compile_options(${EXAMPLE_NAME} PRIVATE -g)
     endif()
   endforeach()
+endif()
+
+## Declare the tests
+if(ROENVEVAL_BUILD_TESTS)
+  enable_testing()
+  find_package(GTest REQUIRED)
+
+  add_executable(test_robot_env_evaluator
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_robot_env_evaluator.cpp
+  )
+  target_link_libraries(test_robot_env_evaluator PRIVATE
+    robot_env_evaluator
+    GTest::GTest
+    GTest::Main
+  )
+  add_test(NAME RobotEnvEvaluatorTests COMMAND test_robot_env_evaluator)
 endif()
