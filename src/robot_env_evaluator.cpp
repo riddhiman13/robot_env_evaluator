@@ -174,16 +174,36 @@ namespace robot_env_evaluator
         for (int i = 0; i < geom_data.distanceResults.size(); i++)
         {
             const auto& distance = geom_data.distanceResults[i];
+            const auto& robot_geom = geom_model.geometryObjects[geom_model.collisionPairs[i].second];
             Eigen::Vector3d seperation_vector = (distance.nearest_points[1] - distance.nearest_points[0]).normalized();
             Eigen::MatrixXd jacobian_matrix;
-            this->jacobianFrame(q, geom_model.geometryObjects[geom_model.collisionPairs[i].second].parentFrame, jacobian_matrix);
+            this->jacobianFrame(q, robot_geom.parentFrame, jacobian_matrix);
+            Eigen::VectorXd projector_control_to_dist = seperation_vector.transpose() * jacobian_matrix.topRows(3);
+            Eigen::VectorXd projector_dist_to_control;
+            if (projector_dist_to_control_enable_) {
+                if (projector_dist_to_control_with_zero_orientation_ == false) {
+                    projector_dist_to_control = (1.0 / projector_control_to_dist.norm() / projector_control_to_dist.norm()) * projector_control_to_dist.transpose();
+                } else {
+                    // Compute the damped Jacobian pseudo-inverse using Jᵀ(JJᵀ + λ²I)⁻¹
+                    Eigen::VectorXd seperation_twist = Eigen::VectorXd::Zero(6);
+                    seperation_twist.head(3) = seperation_vector;
+                    Eigen::MatrixXd JJt = jacobian_matrix * jacobian_matrix.transpose();
+                    Eigen::MatrixXd damped_identity = robust_pinv_lambda_ * robust_pinv_lambda_ * Eigen::MatrixXd::Identity(JJt.rows(), JJt.cols());
+                    
+                    projector_dist_to_control = jacobian_matrix.transpose() * (JJt +  damped_identity).ldlt().solve(seperation_twist);
+                    projector_control_to_dist = (1.0 / projector_dist_to_control.norm() * projector_dist_to_control.norm()) * projector_dist_to_control.transpose();
+                }
+            }
+            
             distances.push_back(distanceResult{
                 i,
                 distance.min_distance,
                 seperation_vector,
                 distance.nearest_points[1],
                 distance.nearest_points[0],
-                seperation_vector.transpose() * jacobian_matrix.topRows(3)
+                robot_geom.name,
+                projector_control_to_dist,
+                projector_dist_to_control
             }); 
         }
 

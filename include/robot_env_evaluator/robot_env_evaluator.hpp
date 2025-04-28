@@ -36,7 +36,9 @@ namespace robot_env_evaluator
         Eigen::Vector3d normal_vector;
         Eigen::Vector3d nearest_point_on_robot;
         Eigen::Vector3d nearest_point_on_object;
+        std::string     contacted_robot_link;
         Eigen::VectorXd projector_jointspace_to_dist;
+        Eigen::VectorXd projector_dist_to_jointspace;
     };
 
     class RobotEnvEvaluator{
@@ -138,8 +140,11 @@ namespace robot_env_evaluator
         void InspectGeomModelAndData(void);
 
         // configurations
-        bool calculate_self_collision_ = false;      ///< Whether to calculate self-collision in distance computation
-    
+        bool calculate_self_collision_ = false;                          ///< Whether to calculate self-collision in distance computation
+        bool projector_dist_to_control_enable_ = false;                  ///< Whether to calculate the projector from distance to control space
+        bool projector_dist_to_control_with_zero_orientation_  = false;  ///< Whether to use the full Jacobian and set the orientation to zero when calculating the projector
+        double robust_pinv_lambda_ = 0.001;                              ///< The lambda value for the robust pseudo-inverse projector
+
     protected:
         /**
          * @brief Get the Jacobian of specific frame.
