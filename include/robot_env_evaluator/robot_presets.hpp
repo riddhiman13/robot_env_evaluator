@@ -46,6 +46,21 @@ namespace robot_env_evaluator{
     };
 
     /**
+     * @brief The Franka Emika Panda no hand collision mesh robot preset
+     * 
+     */
+    class FrankaEmikaNoHandPreset : public RobotPresetInterface{
+        public:
+            FrankaEmikaNoHandPreset() = default;
+            ~FrankaEmikaNoHandPreset() = default;
+    
+            void getPresetRobot(pinocchio::Model& model, 
+                                std::string& ee_name,
+                                std::vector<std::string>& joint_names,
+                                pinocchio::GeometryModel& collision_model) override;
+    };
+
+    /**
      * @brief The factory class to get handle of the robot preset
      * 
      */
