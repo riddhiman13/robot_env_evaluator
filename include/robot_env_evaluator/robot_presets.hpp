@@ -1,3 +1,6 @@
+#ifndef ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP
+#define ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP
+
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/geometry.hpp>
 
@@ -69,3 +72,5 @@ namespace robot_env_evaluator{
             static std::unique_ptr<RobotPresetInterface> createRobotPreset(const std::string& robot_name);
     };
 }
+
+#endif // ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP

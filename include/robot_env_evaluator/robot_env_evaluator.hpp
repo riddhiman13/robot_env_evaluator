@@ -1,5 +1,5 @@
-#ifndef ROBOT_ENV_EVALUATOR_HPP_
-#define ROBOT_ENV_EVALUATOR_HPP_
+#ifndef ROBOT_ENV_EVALUATOR_ROBOT_ENV_EVALUATOR_HPP
+#define ROBOT_ENV_EVALUATOR_ROBOT_ENV_EVALUATOR_HPP
 
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/data.hpp>
@@ -131,14 +131,6 @@ namespace robot_env_evaluator
                               const std::vector<obstacleInput>& obstacles, 
                                     std::vector<distanceResult>& distances);
 
-        /**
-         * @brief Inspect the geom_model_ and geom_data_ stored in the last computeDistances().
-         * 
-         * Use a series of cout command to inspect the state. Only activated when ROENVEVAL_DEBUG_MODE = ON
-         * in CMake option.
-         */
-        void InspectGeomModelAndData(void);
-
         // configurations
         bool calculate_self_collision_ = false;                          ///< Whether to calculate self-collision in distance computation
         bool projector_dist_to_control_enable_ = false;                  ///< Whether to calculate the projector from distance to control space
@@ -185,4 +177,4 @@ namespace robot_env_evaluator
     };
 } // namespace robot_env_evaluator
 
-#endif  // ROBOT_ENV_EVALUATOR_HPP_
+#endif // ROBOT_ENV_EVALUATOR_ROBOT_ENV_EVALUATOR_HPP

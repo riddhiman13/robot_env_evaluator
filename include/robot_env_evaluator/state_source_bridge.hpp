@@ -1,5 +1,5 @@
-#ifndef STATE_SOURCE_BRIDGE_HPP_
-#define STATE_SOURCE_BRIDGE_HPP_
+#ifndef ROBOT_ENV_EVALUATOR_STATE_SOURCE_BRIDGE_HPP
+#define ROBOT_ENV_EVALUATOR_STATE_SOURCE_BRIDGE_HPP
 
 #include <Eigen/Dense>
 #include <stdexcept>
@@ -97,4 +97,4 @@ namespace robot_env_evaluator
     };
 } // namespace robot_env_evaluator
 
-#endif  // STATE_SOURCE_BRIDGE_HPP_
+#endif // ROBOT_ENV_EVALUATOR_STATE_SOURCE_BRIDGE_HPP
