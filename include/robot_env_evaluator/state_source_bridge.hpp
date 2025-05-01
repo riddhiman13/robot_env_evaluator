@@ -5,8 +5,6 @@
 #include <stdexcept>
 #include <string>
 
-#include <franka_hw/franka_model_interface.h>
-
 namespace robot_env_evaluator
 {
     /**
@@ -68,32 +66,6 @@ namespace robot_env_evaluator
          * @param[out] result The gravity vector
          */
         virtual void getGravity(const Eigen::VectorXd& q, Eigen::MatrixXd& result);
-    };
-
-    class FrankaModelInterfaceBridge : public KinematicDataBridge {
-    public:
-        /**
-         * @brief Construct a new FrankaModelInterfaceBridge object
-         * 
-         * @param model_handle The Franka model handle
-         */
-        FrankaModelInterfaceBridge(franka_hw::FrankaModelInterface* model_interface, const std::string& arm_id);
-
-        /**
-         * @brief Destroy the FrankaModelInterfaceBridge object
-         */
-        ~FrankaModelInterfaceBridge() override = default;
-
-        /**
-         * @brief Get the mass matrix for the given joint configuration
-         * 
-         * @param[in] q The joint configuration
-         * @param[out] result The mass matrix
-         */
-        void getMassMatrix(const Eigen::VectorXd& q, Eigen::MatrixXd& result) override;
-    
-    protected:
-        std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
     };
 } // namespace robot_env_evaluator
 
