@@ -4,10 +4,6 @@
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/collision/collision.hpp>
 
-#ifdef ROENVEVAL_DEBUG
-#include <iostream>
-#endif // ROENVEVAL_DEBUG
-
 namespace robot_env_evaluator
 {
     RobotEnvEvaluator::RobotEnvEvaluator(const pinocchio::Model& model,
@@ -206,28 +202,6 @@ namespace robot_env_evaluator
                 projector_dist_to_control
             }); 
         }
-
-        // 6. store the geom_model and geom_data for inspection in debug mode
-        #ifdef ROENVEVAL_DEBUG
-            geom_model_ = geom_model;
-            geom_data_ = geom_data;
-        #endif // ROENVEVAL_DEBUG
-    }
-
-    void RobotEnvEvaluator::InspectGeomModelAndData(void)
-    {
-        #ifdef ROENVEVAL_DEBUG
-            std::cout<< "Inspection on Geometry Objects: " << std::endl;
-            for(int i = 0; i < geom_model_.geometryObjects.size(); i++){
-                std::cout << i << ": " << geom_model_.geometryObjects[i].name << "  \tactive:"<< !geom_model_.geometryObjects[i].disableCollision << std::endl;
-            }
-            std::cout<< "Inspection on Collision Pairs: " << std::endl;
-            for(int i = 0; i < geom_model_.collisionPairs.size(); i++){
-                std::cout << i << ": ";
-                std::cout << geom_model_.collisionPairs[i].first << " [" << geom_model_.geometryObjects[geom_model_.collisionPairs[i].first].name << "] and ";
-                std::cout << geom_model_.collisionPairs[i].second << " [" << geom_model_.geometryObjects[geom_model_.collisionPairs[i].second].name << "]" << std::endl;
-            }
-        #endif // ROENVEVAL_DEBUG
     }
 
     void RobotEnvEvaluator::computeModelData(const Eigen::VectorXd& q)

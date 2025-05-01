@@ -44,6 +44,7 @@ configure_file(
 add_library(robot_env_evaluator SHARED
   ${CMAKE_CURRENT_SOURCE_DIR}/src/robot_env_evaluator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/robot_presets.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state_source_bridge.cpp
 )
 target_include_directories(robot_env_evaluator PUBLIC 
   ${CMAKE_CURRENT_SOURCE_DIR}/include

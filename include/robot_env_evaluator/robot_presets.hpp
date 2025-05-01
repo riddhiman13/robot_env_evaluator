@@ -1,3 +1,6 @@
+#ifndef ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP
+#define ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP
+
 #include <pinocchio/multibody/model.hpp>
 #include <pinocchio/multibody/geometry.hpp>
 
@@ -28,6 +31,8 @@ namespace robot_env_evaluator{
                                     std::string& ee_name,
                                     std::vector<std::string>& joint_names,
                                     pinocchio::GeometryModel& collision_model) = 0;
+
+        virtual bool isFrankaRobot() const { return false; } ///< Check if the robot is a Franka robot
     };
 
     /**
@@ -43,6 +48,8 @@ namespace robot_env_evaluator{
                             std::string& ee_name,
                             std::vector<std::string>& joint_names,
                             pinocchio::GeometryModel& collision_model) override;
+
+        bool isFrankaRobot() const override { return true; } ///< Check if the robot is a Franka robot
     };
 
     /**
@@ -50,14 +57,16 @@ namespace robot_env_evaluator{
      * 
      */
     class FrankaEmikaNoHandPreset : public RobotPresetInterface{
-        public:
-            FrankaEmikaNoHandPreset() = default;
-            ~FrankaEmikaNoHandPreset() = default;
-    
-            void getPresetRobot(pinocchio::Model& model, 
-                                std::string& ee_name,
-                                std::vector<std::string>& joint_names,
-                                pinocchio::GeometryModel& collision_model) override;
+    public:
+        FrankaEmikaNoHandPreset() = default;
+        ~FrankaEmikaNoHandPreset() = default;
+
+        void getPresetRobot(pinocchio::Model& model, 
+                            std::string& ee_name,
+                            std::vector<std::string>& joint_names,
+                            pinocchio::GeometryModel& collision_model) override;
+
+        bool isFrankaRobot() const override { return true; } ///< Check if the robot is a Franka robot
     };
 
     /**
@@ -69,3 +78,5 @@ namespace robot_env_evaluator{
             static std::unique_ptr<RobotPresetInterface> createRobotPreset(const std::string& robot_name);
     };
 }
+
+#endif // ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP

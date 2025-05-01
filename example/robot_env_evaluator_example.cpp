@@ -87,8 +87,7 @@ int main(int argc, char **argv)
         std::cout << "Nearest Point robot: " << distance.nearest_point_on_robot.transpose() << std::endl;
         std::cout << "Nearest Point object: " << distance.nearest_point_on_object.transpose() << std::endl;
         std::cout << "Projector: " << distance.projector_jointspace_to_dist.transpose() << std::endl << std::endl;
-    }    
-    evaluator.InspectGeomModelAndData();
+    }
 
     q = Eigen::VectorXd::Zero(7);
     q << 2.5796, -1.0262, 1.2127, -2.3626, -2.2054, 2.2720, -0.2889;
