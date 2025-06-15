@@ -1,3 +1,22 @@
+/**
+ * @file robot_presets.hpp
+ * @brief Implementation of robot presets for the RobotEnvEvaluator class.
+ * 
+ *  Copyright (C) 2025 Haowen Yao
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP
 #define ROBOT_ENV_EVALUATOR_ROBOT_PRESETS_HPP
 
@@ -20,10 +39,10 @@ namespace robot_env_evaluator{
         /**
          * @brief Get the Preset Robot object
          * 
-         * @param model The robot model output
-         * @param ee_name The end-effector name output
-         * @param joint_names The joint names output
-         * @param collision_model The collision model output
+         * @param[out] model The robot model output
+         * @param[out] ee_name The end-effector name output
+         * @param[out] joint_names The joint names output
+         * @param[out] collision_model The collision model output
          * 
          * This is a pure virtual function, which should be implemented with exact same signature in the derived class.
          */
@@ -44,6 +63,14 @@ namespace robot_env_evaluator{
         FrankaEmikaPreset() = default;
         ~FrankaEmikaPreset() = default;
 
+        /**
+         * @brief Get the Preset Robot object
+         * 
+         * @param[out] model The robot model output
+         * @param[out] ee_name The end-effector name output
+         * @param[out] joint_names The joint names output
+         * @param[out] collision_model The collision model output
+         */
         void getPresetRobot(pinocchio::Model& model, 
                             std::string& ee_name,
                             std::vector<std::string>& joint_names,
@@ -61,6 +88,14 @@ namespace robot_env_evaluator{
         FrankaEmikaNoHandPreset() = default;
         ~FrankaEmikaNoHandPreset() = default;
 
+        /**
+         * @brief Get the Preset Robot object
+         * 
+         * @param[out] model The robot model output
+         * @param[out] ee_name The end-effector name output
+         * @param[out] joint_names The joint names output
+         * @param[out] collision_model The collision model output
+         */
         void getPresetRobot(pinocchio::Model& model, 
                             std::string& ee_name,
                             std::vector<std::string>& joint_names,
@@ -75,6 +110,12 @@ namespace robot_env_evaluator{
      */
     class RobotPresetFactory{
         public:
+            /**
+             * @brief Create a robot preset instance
+             * 
+             * @param[in] robot_name The name of the robot
+             * @return std::unique_ptr<RobotPresetInterface> The created robot preset instance
+             */
             static std::unique_ptr<RobotPresetInterface> createRobotPreset(const std::string& robot_name);
     };
 }

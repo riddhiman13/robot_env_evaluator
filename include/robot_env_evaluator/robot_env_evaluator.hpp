@@ -1,3 +1,22 @@
+/**
+ * @file robot_env_evaluator.hpp
+ * @brief Header file for the RobotEnvEvaluator class, which provides functionalities for evaluating robot environment information.
+ * 
+ *  Copyright (C) 2025 Haowen Yao
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 #ifndef ROBOT_ENV_EVALUATOR_ROBOT_ENV_EVALUATOR_HPP
 #define ROBOT_ENV_EVALUATOR_ROBOT_ENV_EVALUATOR_HPP
 
@@ -41,14 +60,35 @@ namespace robot_env_evaluator
         Eigen::VectorXd projector_dist_to_jointspace;
     };
 
+    /**
+     * @brief The main functionality class, which provides functionalities for evaluating robot environment information.
+     * 
+     * This class provides methods for forward kinematics, jacobian computation, and distance computation
+     * between the robot and obstacles in the environment. It uses the Pinocchio library for kinematics, the pinocchio's
+     * submodule coal for collision detection.
+     * 
+     * The initialization:
+     * 1. Use RobotPresetFactory::createRobotPreset() in robot_presets.hpp 
+     *    to create a robot model, which includes the robot's kinematic model [pinocchio::Model], 
+     *    end-effector name, joint names, and [pinocchio::GeometryModel] collision model.
+     *    Or, you can create your own robot model by loading from URDF files with pinocchio's urdf parser.
+     * 2. Create a RobotEnvEvaluator object with the above data.
+     * 
+     * The functionalities include:
+     * - Forward kinematics for a specific joint or frame: forwardKinematics() and forwardKinematicsByFrameName()
+     * - Jacobian computation for a specific joint or frame: jacobian() and jacobianByFrameName()
+     * - Distance computation between the robot and obstacles: computeDistances()
+     */
     class RobotEnvEvaluator{
     public:
         /**
          * @brief Construct a new Robot Env Evaluator object
          * 
-         * @param model The robot model
-         * @param collision_model The collision model
-         * @param visual_model The visual model
+         * @param[in] model The robot model
+         * @param[in] ee_name The end-effector name
+         * @param[in] joint_names The joint names
+         * @param[in] collision_model The collision model
+         * @param[in] visual_model The visual model
          * 
          * These models are supposed to be loaded from URDF files, and then activate (also deactivate) the
          * collision pairs. Also editing model is acceptable, therefore this class allows a flexible way to
@@ -94,8 +134,6 @@ namespace robot_env_evaluator
                                           const std::string& frame_name);
 
         /**
-
-        /**
          * @brief The jacobian function for a specific joint, specified by the index
          * 
          * @param[in]  q The joint configuration
@@ -123,9 +161,9 @@ namespace robot_env_evaluator
         /**
          * @brief The distance computation function between the robot and obstacles
          * 
-         * @param q The joint configuration
-         * @param obstacles The obstacles in the world, including the shape and pose
-         * @param distances The distances output between the robot and obstacles
+         * @param[in]  q The joint configuration
+         * @param[in]  obstacles The obstacles in the world, including the shape and pose
+         * @param[out] distances The distances output between the robot and obstacles
          */
         void computeDistances(const Eigen::VectorXd& q,
                               const std::vector<obstacleInput>& obstacles, 
@@ -141,9 +179,9 @@ namespace robot_env_evaluator
         /**
          * @brief Get the Jacobian of specific frame.
          * 
-         * @param q The joint configuration
-         * @param frame_index The frame index
-         * @param J The output jacobian matrix
+         * @param[in]  q The joint configuration
+         * @param[in]  frame_index The frame index
+         * @param[out] J The output jacobian matrix
          * 
          * Warning, direct use of this function is not recommended because it does not apply any safety check 
          * on the frame index. Use jacobianByFrameName() instead.
@@ -155,7 +193,7 @@ namespace robot_env_evaluator
         /**
          * @brief Compute the model data from the joint configuration
          * 
-         * @param q The joint configuration
+         * @param[in] q The joint configuration
          * 
          * This function is used to check if the joint configuration is changed, if yes, the computation
          * will be done.
