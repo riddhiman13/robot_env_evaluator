@@ -173,7 +173,9 @@ namespace robot_env_evaluator
         bool calculate_self_collision_ = false;                          ///< Whether to calculate self-collision in distance computation
         bool projector_dist_to_control_enable_ = false;                  ///< Whether to calculate the projector from distance to control space
         bool projector_dist_to_control_with_zero_orientation_  = false;  ///< Whether to use the full Jacobian and set the orientation to zero when calculating the projector
+        bool broad_phase_search_enable_ = true;                           ///< Whether to enable the broad phase search for collision detection
         double robust_pinv_lambda_ = 0.001;                              ///< The lambda value for the robust pseudo-inverse projector
+        double broad_phase_collision_padding_ = 0.05;                    ///< The threshold for the broad phase search, this margin will be appended to first into GJK test and disable the distance computation
 
     protected:
         /**
