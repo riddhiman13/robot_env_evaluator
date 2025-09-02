@@ -56,6 +56,34 @@ namespace robot_env_evaluator
         }
     }
 
+    RobotEnvEvaluator::RobotEnvEvaluator(const RobotEnvEvaluator& other)
+        : model_(other.model_), 
+          data_(other.model_),  // data_ must be initialized from model_, not copied directly
+          collision_model_(other.collision_model_), 
+          visual_model_(other.visual_model_)
+    {
+        // Copy configuration variables
+        calculate_self_collision_ = other.calculate_self_collision_;
+        projector_dist_to_control_enable_ = other.projector_dist_to_control_enable_;
+        projector_dist_to_control_with_zero_orientation_ = other.projector_dist_to_control_with_zero_orientation_;
+        broad_phase_search_enable_ = other.broad_phase_search_enable_;
+        robust_pinv_lambda_ = other.robust_pinv_lambda_;
+        broad_phase_collision_padding_ = other.broad_phase_collision_padding_;
+        
+        // Copy computed indices and buffers
+        ee_index_ = other.ee_index_;
+        joint_indices_ = other.joint_indices_;
+        buffered_q_ = other.buffered_q_;
+        
+        // If the other object has computed data for a specific configuration, 
+        // we need to recompute it to ensure data_ is consistent with buffered_q_
+        if (buffered_q_.size() > 0) {
+            pinocchio::forwardKinematics(model_, data_, buffered_q_); 
+            pinocchio::computeJointJacobians(model_, data_, buffered_q_);
+            pinocchio::updateFramePlacements(model_, data_);
+        }
+    }
+
     void RobotEnvEvaluator::forwardKinematics(const Eigen::VectorXd& q,
                                               Eigen::Matrix4d& T,
                                               const int joint_index /* = -1 */)

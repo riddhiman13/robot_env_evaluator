@@ -101,6 +101,13 @@ namespace robot_env_evaluator
                           const pinocchio::GeometryModel& visual_model = pinocchio::GeometryModel());
         
         /**
+         * @brief Copy constructor for Robot Env Evaluator object
+         * 
+         * @param[in] other The RobotEnvEvaluator object to copy from
+         */
+        RobotEnvEvaluator(const RobotEnvEvaluator& other);
+        
+        /**
          * @brief Destroy the Robot Env Evaluator object
          * 
          */
@@ -211,9 +218,6 @@ namespace robot_env_evaluator
         pinocchio::GeometryModel visual_model_;      ///< The visual model
         int ee_index_;                               ///< The internal index for end-effector.frame
         std::vector<double> joint_indices_;          ///< The joint indices for the robot model
-
-        pinocchio::GeometryModel geom_model_;        ///< The geometry model for collision computation
-        pinocchio::GeometryData geom_data_;          ///< The geometry data for collision computation
     };
 } // namespace robot_env_evaluator
 
