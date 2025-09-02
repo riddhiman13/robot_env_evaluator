@@ -23,6 +23,9 @@
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/collision/collision.hpp>
 
+#include <iostream>
+#include <chrono>
+
 namespace robot_env_evaluator
 {
     RobotEnvEvaluator::RobotEnvEvaluator(const pinocchio::Model& model,
@@ -129,9 +132,11 @@ namespace robot_env_evaluator
 
         // 1. create a GeometryModel from the collision model. Disable all collision pairs if necessary.
         pinocchio::GeometryModel geom_model(collision_model_);
+        pinocchio::GeometryModel broad_phase_geom_model(collision_model_);
         int robot_geom_num = geom_model.ngeoms;
         if(calculate_self_collision_ == false){
             geom_model.removeAllCollisionPairs();
+            broad_phase_geom_model.removeAllCollisionPairs();
         }
 
         // 2. add the obstacles and add collision pairs for obstacles
@@ -140,18 +145,22 @@ namespace robot_env_evaluator
         {
             // 2.1 Construct the collision geometry
             pinocchio::GeometryObject::CollisionGeometryPtr collision_geometry;
+            pinocchio::GeometryObject::CollisionGeometryPtr collision_geometry_broad;
             std::string mesh_path = "";
             Eigen::Vector3d mesh_scale = Eigen::Vector3d::Ones();
-            
-            std::visit([&collision_geometry, &mesh_path, &mesh_scale](auto&& arg) {
+            double broad_phase_collision_padding = broad_phase_collision_padding_;
+
+            std::visit([&collision_geometry, &collision_geometry_broad, &mesh_path, &mesh_scale, &broad_phase_collision_padding](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, coal::Sphere>) {
                     collision_geometry = std::make_shared<coal::Sphere>(arg);
+                    collision_geometry_broad = std::make_shared<coal::Sphere>(arg.radius + broad_phase_collision_padding);
                     mesh_path = "SPHERE";
                     mesh_scale = Eigen::Vector3d::Ones() * arg.radius;
                 }
             }, obstacle.obstacle);
 
+            // 2.2 Add the obstacle to the narrow phase geometry model
             pinocchio::GeometryObject geom_object(
                 "Obstacle_" + std::to_string(i_obstacle),
                 0,
@@ -162,30 +171,65 @@ namespace robot_env_evaluator
                 false,
                 Eigen::Vector4d(0.5, 0.5, 0.5, 1.0)
             );
-
-            // 2.2 Add the obstacle to the geometry model
             geom_model.addGeometryObject(geom_object);
 
-            // 2.3 Add collision pairs between the robot and the obstacle
-            // for collision pairs, we always put the robot higher index body as the second one. 
+            // 2.3 Add the obstacle to the broad phase geometry model
+            pinocchio::GeometryObject broad_geom_object(
+                "Obstacle_" + std::to_string(i_obstacle),
+                0,
+                pinocchio::SE3(obstacle.obstacle_pose),
+                collision_geometry_broad,
+                mesh_path,
+                mesh_scale,
+                false,
+                Eigen::Vector4d(0.5, 0.5, 0.5, 1.0)
+            );
+            broad_phase_geom_model.addGeometryObject(broad_geom_object);
+            
+            // 2.4 Add collision pairs between the robot and the obstacle for broad phase search
+            // for collision pairs, we always put the robot higher index body as the second one.
             // This will help with the distance computation.
             for(int i = 0; i < robot_geom_num; i++){
-                if(geom_model.geometryObjects[i].disableCollision == false){
-                    geom_model.addCollisionPair(pinocchio::CollisionPair(robot_geom_num + i_obstacle, i));
+                if(broad_phase_geom_model.geometryObjects[i].disableCollision == false){
+                    broad_phase_geom_model.addCollisionPair(pinocchio::CollisionPair(robot_geom_num + i_obstacle, i));
                 }
             }
 
             i_obstacle++;
         }
 
-        // 3. create GeometryData from the GeometryModel
-        pinocchio::GeometryData geom_data(geom_model);
+        // 3. Broad phase search for collision pairs, then use this to construct the narrow phase collision pairs
+        pinocchio::GeometryData broad_phase_geom_data(broad_phase_geom_model);
+        if (broad_phase_search_enable_) {
+            // 3.1 Broad phase search for collision pairs
+            pinocchio::updateGeometryPlacements(model_, data_, broad_phase_geom_model, broad_phase_geom_data);
+            pinocchio::computeCollisions(broad_phase_geom_model, broad_phase_geom_data);
+            // 3.2 Filter the collision pairs based on the broad phase distance threshold
+            for (size_t i = 0; i < broad_phase_geom_data.collisionResults.size(); ++i) {
+                const auto& result = broad_phase_geom_data.collisionResults[i];
+                if (result.isCollision()) {
+                    geom_model.addCollisionPair(pinocchio::CollisionPair(
+                        broad_phase_geom_model.collisionPairs[i].first,
+                        broad_phase_geom_model.collisionPairs[i].second));
+                }
+            }
+        } else {
+            for(int j_obstacle = 0; j_obstacle < i_obstacle; j_obstacle++)
+            {
+                for(int i = 0; i < robot_geom_num; i++){
+                    if(geom_model.geometryObjects[i].disableCollision == false){
+                        geom_model.addCollisionPair(pinocchio::CollisionPair(robot_geom_num + j_obstacle, i));
+                    }
+                }
+            }
+        }
 
-        // 4. calculate distances between the robot and obstacles
+        // 4. Narrow phase calculate distances between the robot and obstacles
+        pinocchio::GeometryData geom_data(geom_model);
         pinocchio::updateGeometryPlacements(model_, data_, geom_model, geom_data);
         pinocchio::computeDistances(geom_model, geom_data);
 
-        // 5. output the distances into the output structure
+        // 5. output the distances into the output structure 
         for (int i = 0; i < geom_data.distanceResults.size(); i++)
         {
             const auto& distance = geom_data.distanceResults[i];
